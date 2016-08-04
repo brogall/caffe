@@ -365,6 +365,7 @@ message LayerParameter {
   optional ConcatParameter concat_param = 104;
   optional ContrastiveLossParameter contrastive_loss_param = 105;
   optional ConvolutionParameter convolution_param = 106;
+  optional ConvolutionAtrousParameter convolution_atrous_param = 151;
   optional CropParameter crop_param = 144;
   optional DataParameter data_param = 107;
   optional DenseCRFParameter dense_crf_param = 150;
@@ -605,6 +606,36 @@ message ConvolutionParameter {
   // implementation; for input blobs with num_axes != 2, this option is
   // ignored and the ND implementation will be used.)
   optional bool force_nd_im2col = 17 [default = false];
+}
+
+
+// Message that stores parameters used by ConvolutionLayer
+message ConvolutionAtrousParameter {
+  optional uint32 num_output = 1; // The number of outputs for the layer
+  optional bool bias_term = 2 [default = true]; // whether to have bias terms
+  // Pad, kernel size, and stride are all given as a single value for equal
+  // dimensions in height and width or as Y, X pairs.
+  optional uint32 pad = 3 [default = 0]; // The padding size (equal in Y, X)
+  optional uint32 pad_h = 9 [default = 0]; // The padding height
+  optional uint32 pad_w = 10 [default = 0]; // The padding width
+  optional uint32 kernel_size = 4; // The kernel size (square)
+  optional uint32 kernel_h = 11; // The kernel height
+  optional uint32 kernel_w = 12; // The kernel width
+  optional uint32 group = 5 [default = 1]; // The group size for group conv
+  optional uint32 stride = 6 [default = 1]; // The stride (equal in Y, X)
+  optional uint32 stride_h = 13; // The stride height
+  optional uint32 stride_w = 14; // The stride width
+  optional uint32 hole = 17 [default = 1]; // The filter stride (equal in Y, X)
+  optional uint32 hole_h = 18 [default = 1]; // The filter stride height
+  optional uint32 hole_w = 19 [default = 1]; // The filter stride width
+  optional FillerParameter weight_filler = 7; // The filler for the weight
+  optional FillerParameter bias_filler = 8; // The filler for the bias
+  enum Engine {
+    DEFAULT = 0;
+    CAFFE = 1;
+    CUDNN = 2;
+  }
+  optional Engine engine = 15 [default = DEFAULT];
 }
 
 message CropParameter {
