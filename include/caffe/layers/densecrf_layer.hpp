@@ -18,7 +18,7 @@ template <typename Dtype>
 class DenseCRFLayer : public Layer<Dtype> {
 public:
     explicit DenseCRFLayer(const LayerParameter& param)
-    : Layer<Dtype>(param) {}
+    : Layer<Dtype>(param) { unary_ = NULL; current_ = NULL; next_ = NULL; tmp_ = NULL;}
     virtual ~DenseCRFLayer();
     
     virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
@@ -29,6 +29,7 @@ public:
     // will take DCNN output, image (optional) and image_dim as input
     virtual inline int MinBottomBlobs() const { return 2; }
     virtual inline int ExactNumTopBlobs() const { return 1; }
+    virtual inline const char* type() const { return "DenseCRF"; }
     
 protected:
     virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,

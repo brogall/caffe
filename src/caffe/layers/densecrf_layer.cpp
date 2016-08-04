@@ -187,7 +187,9 @@ void DenseCRFLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
 
 template <typename Dtype>
 DenseCRFLayer<Dtype>::~DenseCRFLayer() {
+    std::cout << "Destructor1 called" << std::endl;
   ClearPairwiseFunctions();
+    std::cout << "Destructor2 called" << std::endl;
   DeAllocateAllData();
 }
 
@@ -197,6 +199,11 @@ void DenseCRFLayer<Dtype>::DeAllocateAllData() {
   deallocate(current_);
   deallocate(next_);
   deallocate(tmp_);
+    
+  unary_   = NULL;
+  current_ = NULL;
+  next_    = NULL;
+  tmp_     = NULL;
 }
 
 template <typename Dtype>
