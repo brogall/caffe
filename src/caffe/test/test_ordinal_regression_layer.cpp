@@ -54,8 +54,8 @@ namespace caffe {
 
         LayerParameter layer_param;
         int num_classes = 5;
-        ORParameter* or_param = layer_param.mutable_or_param();
-        or_param->set_classes(num_classes);
+        OrdinalRegressionParameter* ordinal_regression_param = layer_param.mutable_ordinal_regression_param();
+        ordinal_regression_param->set_classes(num_classes);
 
         shared_ptr<OrdinalRegressionLayer<TypeParam> > layer(
                                                                      new OrdinalRegressionLayer<TypeParam>(layer_param));
@@ -69,8 +69,8 @@ namespace caffe {
 
         int num_classes = 5;
         LayerParameter layer_param;
-        ORParameter* or_param = layer_param.mutable_or_param();
-        or_param->set_classes(num_classes);
+        OrdinalRegressionParameter* ordinal_regression_param = layer_param.mutable_ordinal_regression_param();
+        ordinal_regression_param->set_classes(num_classes);
         shared_ptr<OrdinalRegressionLayer<TypeParam> > layer(new OrdinalRegressionLayer<TypeParam>(layer_param));
         layer->blobs().resize(2);
         //layer->blobs()[0].reset(new Blob<TypeParam>(5,1,0,0));
@@ -124,8 +124,8 @@ namespace caffe {
 
         int num_classes = 5;
         LayerParameter layer_param;
-        ORParameter* or_param = layer_param.mutable_or_param();
-        or_param->set_classes(num_classes);
+        OrdinalRegressionParameter* ordinal_regression_param = layer_param.mutable_ordinal_regression_param();
+        ordinal_regression_param->set_classes(num_classes);
         shared_ptr<OrdinalRegressionLayer<TypeParam> > layer(new OrdinalRegressionLayer<TypeParam>(layer_param));
         layer->blobs().resize(3);
         //layer->blobs()[0].reset(new Blob<TypeParam>(5,1,0,0));
@@ -177,8 +177,8 @@ namespace caffe {
 
         int num_classes = 5;
         LayerParameter layer_param;
-        ORParameter* or_param = layer_param.mutable_or_param();
-        or_param->set_classes(num_classes);
+        OrdinalRegressionParameter* ordinal_regression_param = layer_param.mutable_ordinal_regression_param();
+        ordinal_regression_param->set_classes(num_classes);
         OrdinalRegressionLayer<TypeParam> layer(layer_param);
         layer.blobs().resize(2);
 

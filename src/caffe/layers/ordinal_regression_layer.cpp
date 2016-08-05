@@ -46,11 +46,11 @@ namespace caffe {
 
         Layer<Dtype>::LayerSetUp(bottom, top);
 
-        ORParameter or_param = this->layer_param_.or_param();
+        OrdinalRegressionParameter ordinal_regression_param = this->layer_param_.ordinal_regression_param();
 
         //top.resize(2);
 
-        CHECK( or_param.has_classes() ) << "Number of classes needs to be specified";
+        CHECK( ordinal_regression_param.has_classes() ) << "Number of classes needs to be specified";
 
 
         const int axis = bottom[0]->CanonicalAxisIndex(1);
@@ -60,7 +60,7 @@ namespace caffe {
         K_ = bottom[0]->count(axis);
 
 
-        this->num_classes_ = or_param.classes();
+        this->num_classes_ = ordinal_regression_param.classes();
 
         this->N_ = this->num_classes_-1;
         this->M_ = this->N_-1;
@@ -82,14 +82,14 @@ namespace caffe {
             this->blobs_[0].reset(new Blob<Dtype>(weight_shape));
             // fill the weights
             shared_ptr<Filler<Dtype> > weight_filler(GetFiller<Dtype>(
-                                                                      this->layer_param_.or_param().weight_filler()));
+                                                                      this->layer_param_.ordinal_regression_param().weight_filler()));
             weight_filler->Fill(this->blobs_[0].get());
 
             vector<int> gamma_shape(1);
             gamma_shape[0] = N_;
             this->blobs_[1].reset(new Blob<Dtype>(gamma_shape));
             shared_ptr<Filler<Dtype> > gamma_filler(GetFiller<Dtype>(
-                                                                     this->layer_param_.or_param().gamma_filler()));
+                                                                     this->layer_param_.ordinal_regression_param().gamma_filler()));
             gamma_filler->Fill(this->blobs_[1].get());
         }
 
@@ -278,12 +278,12 @@ namespace caffe {
         int num = bottom[0]->shape(0);
         int dim = bottom[0]->count() / bottom[0]->shape(0);
 
-        ORParameter or_param = this->layer_param_.or_param();
+        OrdinalRegressionParameter ordinal_regression_param = this->layer_param_.ordinal_regression_param();
 
         vector<int> top_shape1(2);
 
         top_shape1[0] = num;
-        top_shape1[1] = or_param.classes();
+        top_shape1[1] = ordinal_regression_param.classes();
 
         // Probabilities for each element and class
         top[0]->Reshape(top_shape1);
@@ -294,7 +294,7 @@ namespace caffe {
         this->blobs_[0]->Reshape(blob1_shape);
 
         vector<int> blob2_shape(1);
-        blob2_shape[0] = or_param.classes()-1;
+        blob2_shape[0] = ordinal_regression_param.classes()-1;
 
         this->blobs_[1]->Reshape(blob2_shape);
 
