@@ -284,4 +284,5 @@ STUB_GPU(ConvolutionAtrousLayer);
 #endif
 
 INSTANTIATE_CLASS(ConvolutionAtrousLayer);
+REGISTER_LAYER_CLASS(ConvolutionAtrous);
 }  // namespace caffe
