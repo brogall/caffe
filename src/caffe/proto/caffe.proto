@@ -386,6 +386,7 @@ message LayerParameter {
   optional LogParameter log_param = 134;
   optional LRNParameter lrn_param = 118;
   optional MemoryDataParameter memory_data_param = 119;
+  optional MemoryDataNDParameter memory_datand_param = 153;
   optional MVNParameter mvn_param = 120;
   optional OrdinalRegressionParameter ordinal_regression_param = 152;
   optional ParameterParameter parameter_param = 145;
@@ -912,6 +913,14 @@ message MemoryDataParameter {
   optional uint32 height = 3;
   optional uint32 width = 4;
 }
+
+// Message that stores parameters used by MemoryDataLayer
+message MemoryDataNDParameter {
+  repeated uint32 size = 1;
+  optional uint32 batch_size = 2;
+  repeated uint32 classes = 3;
+}
+
 
 message MVNParameter {
   // This parameter can be set to false to normalize mean only

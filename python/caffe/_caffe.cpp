@@ -16,6 +16,7 @@
 
 #include "caffe/caffe.hpp"
 #include "caffe/layers/memory_data_layer.hpp"
+#include "caffe/layers/memory_dataND_layer.hpp"
 #include "caffe/layers/python_layer.hpp"
 #include "caffe/sgd_solvers.hpp"
 
@@ -86,6 +87,24 @@ void CheckContiguousArray(PyArrayObject* arr, string name,
   if (PyArray_DIMS(arr)[3] != width) {
     throw std::runtime_error(name + " has wrong width");
   }
+}
+
+void CheckContiguousArray(PyArrayObject* arr, string name, const vector<int>& shape) {
+    if (!(PyArray_FLAGS(arr) & NPY_ARRAY_C_CONTIGUOUS)) {
+        throw std::runtime_error(name + " must be C contiguous");
+    }
+    if (PyArray_NDIM(arr) != shape.size()) {
+        throw std::runtime_error(name + " must be matching N-d: " + std::to_string(PyArray_NDIM(arr)) + " vs. "+ std::to_string(shape.size()));
+    }
+    if (PyArray_TYPE(arr) != NPY_FLOAT32) {
+        throw std::runtime_error(name + " must be float32");
+    }
+    
+    for (int i = 1; i < shape.size(); ++i) {
+        if ( PyArray_DIMS(arr)[i] != shape[i] ) {
+            throw std::runtime_error(name + " shape mis-match at "+std::to_string(i)+": "+std::to_string(PyArray_DIMS(arr)[i])+" vs. "+std::to_string(shape[i]));
+        }
+    }
 }
 
 // Net constructor
@@ -178,6 +197,75 @@ void Net_SetInputArrays(Net<Dtype>* net, bp::object data_obj,
       static_cast<Dtype*>(PyArray_DATA(labels_arr)),
       PyArray_DIMS(data_arr)[0]);
 }
+    
+    void Net_SetInputNDArrays(Net<Dtype>* net, bp::object data_obj,
+                              bp::list& labels_list) {
+        // check that this network has an input MemoryDataLayer
+        shared_ptr<MemoryDataNDLayer<Dtype> > md_layer =
+        boost::dynamic_pointer_cast<MemoryDataNDLayer<Dtype> >(net->layers()[0]);
+        if (!md_layer) {
+            throw std::runtime_error("set_inputND_arrays may only be called if the"
+                                     " first layer is a MemoryDataNDLayer");
+        }
+        
+        // check that we were passed appropriately-sized contiguous memory
+        PyArrayObject* data_arr =
+        reinterpret_cast<PyArrayObject*>(data_obj.ptr());
+        //PyArrayObject* labels_arr =
+        //reinterpret_cast<PyArrayObject*>(labels_obj.ptr());
+        //CheckContiguousArray(data_arr, "data array", md_layer->channels(),
+        //                     md_layer->height(), md_layer->width());
+        //std::cout << "Shape: " << md_layer->shape()[0] << " " << md_layer->shape()[1] << " " << md_layer->shape()[2] << " " << md_layer->shape()[3] << " " << md_layer->shape()[4] << std::endl;
+        CheckContiguousArray(data_arr, "data array", md_layer->shape());
+        
+        /*vector<int> tmp_vec_(md_layer->shape().size());
+         tmp_vec_[0] = PyArray_DIMS(labels_arr)[0];
+         for (int i=1; i<md_layer->shape().size();i++) {
+         tmp_vec_[i] = 1;
+         }*/
+        
+        /*CheckContiguousArray(labels_arr, "labels array", tmp_vec_);
+         if (PyArray_DIMS(data_arr)[0] != PyArray_DIMS(labels_arr)[0]) {
+         throw std::runtime_error("data and labels must have the same first"
+         " dimension");
+         }*/
+        
+        if (PyArray_DIMS(data_arr)[0] % md_layer->batch_size() != 0) {
+            throw std::runtime_error("first dimensions of input arrays must be a"
+                                     " multiple of batch size. Data: "+std::to_string(PyArray_DIMS(data_arr)[0] ) + " vs. batch size: "+std::to_string(md_layer->batch_size() ));
+        }
+        vector<Dtype* > label_vec;
+        vector<int> dim_vec;
+        int dim = 1;
+        
+        for (int i = 0; i < len(labels_list); ++i)
+        {
+            bp::object data_obj = bp::extract<bp::object>(labels_list[i]);
+            
+            PyArrayObject* labels_arr =
+            reinterpret_cast<PyArrayObject*>(data_obj.ptr());
+            
+            //if ( i == 0)
+            dim = PyArray_DIMS(labels_arr)[1];
+            //else if  (PyArray_DIMS(labels_arr)[1] != dim)
+            //    throw std::runtime_error("Elements in vector must all have the same dimensionality");
+            dim_vec.push_back(dim);
+            if (PyArray_TYPE(labels_arr) != NPY_FLOAT32) {
+                throw std::runtime_error("Elements in vector must be float32");
+            }
+            if (PyArray_DIMS(data_arr)[0] != PyArray_DIMS(labels_arr)[0]) {
+                throw std::runtime_error("data and labels must have the same first"
+                                         " dimension");
+            }
+            
+            Dtype* data = static_cast<Dtype*>(PyArray_DATA(labels_arr));
+            label_vec.push_back(data);
+        }
+        
+        md_layer->Reset(static_cast<Dtype*>(PyArray_DATA(data_arr)),
+                        &label_vec,
+                        PyArray_DIMS(data_arr)[0], &dim_vec);
+    }
 
 Solver<Dtype>* GetSolverFromFile(const string& filename) {
   SolverParameter param;
@@ -327,6 +415,8 @@ BOOST_PYTHON_MODULE(_caffe) {
         bp::make_function(&Net<Dtype>::output_blob_indices,
         bp::return_value_policy<bp::copy_const_reference>()))
     .def("_set_input_arrays", &Net_SetInputArrays,
+        bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >())
+    .def("_set_input_ndarrays", &Net_SetInputNDArrays,
         bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >())
     .def("save", &Net_Save)
     .def("save_hdf5", &Net_SaveHDF5)

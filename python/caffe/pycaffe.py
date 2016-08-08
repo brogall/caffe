@@ -259,6 +259,17 @@ def _Net_set_input_arrays(self, data, labels):
     return self._set_input_arrays(data, labels)
 
 
+def _Net_set_input_ndarrays(self, data, labels):
+    """
+        Set input arrays of the in-memory MemoryDataLayer.
+        (Note: this is only for networks declared with the memory data layer.)
+        """
+    #if labels.ndim == 1:
+    #    labels = np.ascontiguousarray(labels[:, np.newaxis, np.newaxis,
+    #                                         np.newaxis])
+    return self._set_input_ndarrays(data, labels)
+
+
 def _Net_batch(self, blobs):
     """
     Batch blob lists according to net's batch size.
@@ -327,6 +338,7 @@ Net.backward = _Net_backward
 Net.forward_all = _Net_forward_all
 Net.forward_backward_all = _Net_forward_backward_all
 Net.set_input_arrays = _Net_set_input_arrays
+Net.set_input_ndarrays = _Net_set_input_ndarrays
 Net._batch = _Net_batch
 Net.inputs = _Net_inputs
 Net.outputs = _Net_outputs

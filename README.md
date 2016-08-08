@@ -6,6 +6,8 @@ This is a modification of the popular Caffe framework:
 
 - Integrated (logistic) ordinal regression layer. More general information about logistic ordinal regression can be found in this nice blog for example [website](http://fa.bianp.net/blog/2013/logistic-ordinal-regression/).
 
+- Integrated multi-dimensional memory data layer (MemoryDataNDLayer), also allows  for multi-dimensional labels (e.g. when using SigmoidCrossEntropyLoss)
+
 
 [![Build Status](https://travis-ci.org/BVLC/caffe.svg?branch=master)](https://travis-ci.org/BVLC/caffe)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
